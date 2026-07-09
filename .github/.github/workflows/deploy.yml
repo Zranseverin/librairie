@@ -26,10 +26,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          # Supprimer 'cache: npm' car il utilise npm ci
       
       - name: Install NPM dependencies
-        run: npm ci
+        run: npm install  # Changé de npm ci à npm install
       
       - name: Build assets
         run: npm run build
