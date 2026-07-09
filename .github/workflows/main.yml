@@ -34,48 +34,6 @@ jobs:
       - name: Build assets
         run: npm run build
       
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          script: |
-            cd ${{ secrets.REMOTE_PATH }}
-            
-            # Sauvegarder .env
-            if [ -f .env ]; then
-              cp .env .env.backup
-            fi
-            
-            # Pull les changements
-            git pull origin master
-            
-            # Restaurer .env
-            if [ -f .env.backup ]; then
-              mv .env.backup .env
-            fi
-            
-            # Installer les dépendances
-            composer install --no-dev --optimize-autoloader
-            npm ci
-            npm run build
-            
-            # Si Laravel
-            php artisan migrate --force
-            php artisan optimize:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            
-            # Permissions
-            chown -R www-data:www-data storage bootstrap/cache
-            chmod -R 775 storage bootstrap/cache
-            
-            # Redémarrer les services
-            sudo systemctl reload nginx || sudo systemctl reload apache2 || echo "Service reload skipped"
-      
       - name: Health check
         run: |
           sleep 10
